@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Impro Cards - Generator v1.2</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f7f9fc;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #2c3e50;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 15px;
+        color: #3498db;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+      }
+      .app-info {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+        margin-bottom: 20px;
+      }
+      .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: space-between;
+        margin-bottom: 30px;
+      }
+      .card-section {
+        flex: 1;
+        min-width: 250px;
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+      .card-section:hover {
+        transform: translateY(-5px);
+      }
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+      }
+      .card-title {
+        margin: 0;
+        color: #3498db;
+      }
+      .card-id {
+        font-size: 0.9rem;
+        font-weight: bold;
+        background: #3498db;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 8px;
+        display: inline-block;
+      }
+      .card-content {
+        min-height: 150px;
+        background: #f9f9f9;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #3498db;
+      }
+      .timer-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 30px;
+        text-align: center;
+      }
+      .time-display {
+        font-size: 3rem;
+        font-weight: bold;
+        margin: 20px 0;
+        color: #2c3e50;
+      }
+      .timer-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+      }
+      button {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s ease;
+      }
+      button:hover {
+        background: #2980b9;
+      }
+      button.timer-time {
+        background: #95a5a6;
+      }
+      button.timer-time:hover {
+        background: #7f8c8d;
+      }
+      button.primary {
+        background: #2ecc71;
+      }
+      button.primary:hover {
+        background: #27ae60;
+      }
+      button.danger {
+        background: #e74c3c;
+      }
+      button.danger:hover {
+        background: #c0392b;
+      }
+      button.draw-all {
+        background: #9b59b6;
+        padding: 12px 25px;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        width: 100%;
+      }
+      button.draw-all:hover {
+        background: #8e44ad;
+      }
+      button.toggle-rules {
+        background: #f39c12;
+        padding: 10px 20px;
+        margin: 0 auto 20px;
+        display: block;
+      }
+      button.toggle-rules:hover {
+        background: #e67e22;
+      }
+      button.save-button {
+        background: #16a085;
+        margin-top: 15px;
+      }
+      button.save-button:hover {
+        background: #1abc9c;
+      }
+      button.reset-cards {
+        background: #e67e22;
+        margin-top: 15px;
+      }
+      button.reset-cards:hover {
+        background: #d35400;
+      }
+      .rules-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        display: none;
+      }
+      .combination-info {
+        text-align: center;
+        margin: 10px 0 20px;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+      }
+      .combination-info span {
+        font-weight: bold;
+        color: #3498db;
+      }
+      @media (max-width: 768px) {
+        .card-container {
+          flex-direction: column;
+        }
+        .card-section {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Impro Cards - Generator</h1>
+    <div class="app-info">Wersja 1.2 | Improwizacyjna gra karciana</div>
+
+    <button class="toggle-rules" id="toggleRules">Pokaż zasady gry</button>
+
+    <div class="rules-section" id="rulesSection">
+      <h2>Jak Grać</h2>
+      <ol>
+        <li>Podzielcie się na dwie grupy: Aktorów i Publiczność.</li>
+        <li>
+          Użyjcie generatora, aby wylosować kartę Miejsca, Postaci dla każdego
+          Aktora, Relację między postaciami oraz kartę Inspiracji.
+        </li>
+        <li>Aktorzy rozpoczynają scenę opartą na wylosowanych kartach.</li>
+        <li>
+          W trakcie sceny, Publiczność może wylosować kartę Wyzwania, które
+          Aktorzy muszą uwzględnić.
+        </li>
+        <li>Użyjcie timera, aby kontrolować czas sceny (zalecane 5 minut).</li>
+        <li>Za każdą zrealizowaną kartę grupa otrzymuje 10 punktów.</li>
+        <li>
+          Po zakończeniu sceny role się zmieniają i rozgrywana jest kolejna
+          runda.
+        </li>
+      </ol>
+    </div>
+
+    <button class="draw-all" onclick="drawAllCards()">
+      Losuj Wszystkie Karty
+    </button>
+
+    <div class="combination-info" id="combinationInfo">
+      Numer kombinacji: <span id="combinationNumber">-</span>
+    </div>
+
+    <div class="card-container">
+      <div class="card-section">
+        <div class="card-header">
+          <h3 class="card-title">
+            Miejsce <span id="location-id" class="card-id">-</span>
+          </h3>
+          <button onclick="drawCard('locations')">Losuj</button>
+        </div>
+        <div class="card-content" id="location-card">
+          <p>Naciśnij "Losuj" aby wylosować kartę miejsca...</p>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <div class="card-header">
+          <h3 class="card-title">
+            Postać <span id="character-id" class="card-id">-</span>
+          </h3>
+          <button onclick="drawCard('characters')">Losuj</button>
+        </div>
+        <div class="card-content" id="character-card">
+          <p>Naciśnij "Losuj" aby wylosować kartę postaci...</p>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <div class="card-header">
+          <h3 class="card-title">
+            Relacja <span id="relationship-id" class="card-id">-</span>
+          </h3>
+          <button onclick="drawCard('relationships')">Losuj</button>
+        </div>
+        <div class="card-content" id="relationship-card">
+          <p>Naciśnij "Losuj" aby wylosować kartę relacji...</p>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <div class="card-header">
+          <h3 class="card-title">
+            Inspiracja <span id="inspiration-id" class="card-id">-</span>
+          </h3>
+          <button onclick="drawCard('inspirations')">Losuj</button>
+        </div>
+        <div class="card-content" id="inspiration-card">
+          <p>Naciśnij "Losuj" aby wylosować kartę inspiracji...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-section">
+      <div class="card-header">
+        <h3 class="card-title">
+          Wyzwanie <span id="challenge-id" class="card-id">-</span>
+        </h3>
+        <button onclick="drawCard('challenges')">Losuj</button>
+      </div>
+      <div class="card-content" id="challenge-card">
+        <p>Naciśnij "Losuj" aby wylosować kartę wyzwania...</p>
+      </div>
+    </div>
+
+    <button class="save-button" id="saveButton">Zapisz wyniki do pliku</button>
+    <button class="reset-cards" id="resetCards">Resetuj Karty</button>
+
+    <div class="timer-section">
+      <h2>Stoper</h2>
+      <div class="time-display" id="timer">00:00</div>
+      <div class="timer-buttons">
+        <button class="timer-time" onclick="setTimer(1)">1 minuta</button>
+        <button class="timer-time" onclick="setTimer(2)">2 minuty</button>
+        <button class="timer-time" onclick="setTimer(3)">3 minuty</button>
+        <button class="timer-time" onclick="setTimer(4)">4 minuty</button>
+        <button class="timer-time" onclick="setTimer(5)">5 minut</button>
+      </div>
+      <div class="timer-buttons">
+        <button class="primary" id="startTimer">Start</button>
+        <button class="danger" id="stopTimer">Stop</button>
+        <button id="resetTimer">Reset</button>
+      </div>
+    </div>
+
+    <script>
+      // Karty
+      const cards = {
+        locations: [
+          // Istniejące lokalizacje (20)
+          {
+            id: "00",
+            title: "Opuszczona Stacja Metra",
+            description:
+              "Podziemna przestrzeń z echem, ciemnymi zakamarkami i pozostawionymi przedmiotami.",
+          },
+          {
+            id: "01",
+            title: "Zatłoczona Restauracja",
+            description:
+              "Gwar rozmów, brzęk sztućców i zapach jedzenia podczas szczytu lunchowego.",
+          },
+          {
+            id: "02",
+            title: "Stacja Kosmiczna",
+            description:
+              "Sterylne wnętrze, migające światła kontrolne i widok na kosmos za iluminatorami.",
+          },
+          {
+            id: "03",
+            title: "Średniowieczny Zamek",
+            description:
+              "Kamienne ściany, pochodnie, zbroje i tajemnicze korytarze.",
+          },
+          {
+            id: "04",
+            title: "Sala Lekcyjna",
+            description:
+              "Rzędy ławek, tablica, mapy na ścianach i atmosfera oczekiwania.",
+          },
+          {
+            id: "05",
+            title: "Plac Budowy",
+            description:
+              "Dźwięki maszyn, niedokończone konstrukcje, robotnicy w kaskach.",
+          },
+          {
+            id: "06",
+            title: "Tropikalna Plaża",
+            description:
+              "Szum fal, piasek pod stopami, palmy i zapach morskiej bryzy.",
+          },
+          {
+            id: "07",
+            title: "Sklep z antykami",
+            description:
+              "Zakurzone przedmioty, ciasne przejścia, przytłumione światło i atmosfera tajemnicy.",
+          },
+          {
+            id: "08",
+            title: "Gabinet Dentystyczny",
+            description:
+              "Fotel zabiegowy, brzęczące wiertła i zapach środków dezynfekujących.",
+          },
+          {
+            id: "09",
+            title: "Biblioteka Po Zmroku",
+            description:
+              "Wysokie regały z książkami, cisza, przyćmione światło lamp i szum wentylacji.",
+          },
+          {
+            id: "10",
+            title: "Zatłoczony Pociąg",
+            description:
+              "Kołysanie wagonu, rozmowy pasażerów, stukot kół na torach.",
+          },
+          {
+            id: "11",
+            title: "Supermarket podczas Wyprzedaży",
+            description:
+              "Tłum kupujących, wózki, półki z towarami i ogłoszenia przez głośniki.",
+          },
+          {
+            id: "12",
+            title: "Scena Teatralna",
+            description:
+              "Reflektory, kurtyna, rekwizyty i niewidoczna publiczność.",
+          },
+          {
+            id: "13",
+            title: "Pokój Hotelowy",
+            description:
+              "Schludnie pościelone łóżko, standardowe meble, widok z okna.",
+          },
+          {
+            id: "14",
+            title: "Laboratorium Naukowe",
+            description:
+              "Probówki, dymiący płyn, skomplikowana aparatura i zapach chemikaliów.",
+          },
+          {
+            id: "15",
+            title: "Salon Fryzjerski",
+            description:
+              "Lustra, fotele, odgłos nożyczek, suszarek i rozmów klientów.",
+          },
+          {
+            id: "16",
+            title: "Podwodna Baza",
+            description:
+              "Metalowe ściany, iluminatory z widokiem na morskie głębiny, dźwięk systemów podtrzymywania życia.",
+          },
+          {
+            id: "17",
+            title: "Zagracony Strych",
+            description:
+              "Kurz, stare pudła, pamiątki rodzinne, pająki i przytłumione światło.",
+          },
+          {
+            id: "18",
+            title: "Sala Operacyjna",
+            description:
+              "Sterylne otoczenie, narzędzia chirurgiczne, monitory i napięta atmosfera.",
+          },
+          {
+            id: "19",
+            title: "Posterunek Policji",
+            description:
+              "Biurka z dokumentami, telefony, tablica z zdjęciami poszukiwanych i zapach kawy.",
+          },
+          // Nowe lokalizacje (20)
+          {
+            id: "20",
+            title: "Cmentarz o Północy",
+            description:
+              "Kamienne nagrobki, światło księżyca, cienie drzew i przenikliwy chłód.",
+          },
+          {
+            id: "21",
+            title: "Wnętrze Wulkanu",
+            description:
+              "Czerwona poświata lawy, niestabilny grunt, gorące powietrze i odgłosy bulgotania.",
+          },
+          {
+            id: "22",
+            title: "Elegancka Galeria Sztuki",
+            description:
+              "Białe ściany, abstrakcyjne obrazy, szepty koneserów i kieliszki z szampanem.",
+          },
+          {
+            id: "23",
+            title: "Więzienny Blok",
+            description:
+              "Metalowe kraty, wąskie łóżka, krzyki strażników i odgłosy zamykanych cel.",
+          },
+          {
+            id: "24",
+            title: "Warsztat Samochodowy",
+            description:
+              "Zapach oleju, metaliczne dźwięki, brudne narzędzia i samochody na podnośnikach.",
+          },
+          {
+            id: "25",
+            title: "Poddasze Artysty",
+            description:
+              "Duże okna, niedokończone obrazy, farby, porozrzucane szkice i zapach terpentyny.",
+          },
+          {
+            id: "26",
+            title: "Las Deszczowy",
+            description:
+              "Gęsta roślinność, odgłosy egzotycznych zwierząt, wilgoć i przebijające się promienie słońca.",
+          },
+          {
+            id: "27",
+            title: "Studio Telewizyjne",
+            description:
+              "Kamery, reflektory, przewody, makijaż i nerwowa atmosfera przed emisją.",
+          },
+          {
+            id: "28",
+            title: "Statek Wikingów",
+            description:
+              "Drewniane burty, wiosła, zapach morskiej soli i trzepoczące na wietrze żagle.",
+          },
+          {
+            id: "29",
+            title: "Kawiarnia Internetowa",
+            description:
+              "Rzędy komputerów, przytłumione rozmowy, stukot klawiatur i zapach kawy.",
+          },
+          {
+            id: "30",
+            title: "Pole Bitwy",
+            description:
+              "Zdewastowany teren, ślady walki, dym w oddali i napięta cisza po konflikcie.",
+          },
+          {
+            id: "31",
+            title: "Klub Nocny",
+            description:
+              "Głośna muzyka, migające światła, tańczący ludzie i duszna atmosfera.",
+          },
+          {
+            id: "32",
+            title: "Bezludna Wyspa",
+            description:
+              "Piaszczysta plaża, rosnące palmy, szum fal i niezmącona samotność.",
+          },
+          {
+            id: "33",
+            title: "Basen Publiczny",
+            description:
+              "Zapach chloru, plusk wody, echo rozmów i mokre kafelki.",
+          },
+          {
+            id: "34",
+            title: "Statek Piracki",
+            description:
+              "Kołysający się pokład, skrzynie ze skarbami, beczki rumu i postrzępione flagi.",
+          },
+          {
+            id: "35",
+            title: "Świątynia Buddyjska",
+            description:
+              "Zapach kadzideł, medytujący mnisi, posągi i atmosfera kontemplacji.",
+          },
+          {
+            id: "36",
+            title: "Cyrk pod Namiotem",
+            description:
+              "Kolorowe światła, występujący artyści, widownia na trybunach i zapach popcornu.",
+          },
+          {
+            id: "37",
+            title: "Sala Sądowa",
+            description:
+              "Drewniane ławy, podwyższenie dla sędziego, napięta atmosfera i formal​ne procedury.",
+          },
+          {
+            id: "38",
+            title: "Stacja Polarna",
+            description:
+              "Śnieżny krajobraz za oknami, sprzęt badawczy, ciepłe ubrania i izolacja od świata.",
+          },
+          {
+            id: "39",
+            title: "Wesołe Miasteczko",
+            description:
+              "Kolorowe karuzele, krzyki z kolejki górskiej, zapach waty cukrowej i muzyka.",
+          },
+        ],
+        characters: [
+          // Istniejące postacie (15)
+          {
+            id: "00",
+            title: "Zdenerwowany Kucharz",
+            description:
+              "Zawsze pod presją czasu, z temperamentem i talentem kulinarnym.",
+          },
+          {
+            id: "01",
+            title: "Zagubiony Turysta",
+            description:
+              "Z mapą w dłoni, aparatem na szyi i kompletnym brakiem orientacji.",
+          },
+          {
+            id: "02",
+            title: "Emerytowany Detektyw",
+            description:
+              "Wciąż szukający wskazówek, z bagażem doświadczeń i nostalgią za dawnymi czasami.",
+          },
+          {
+            id: "03",
+            title: "Ambitny Ogrodnik",
+            description:
+              "Zakochany w roślinach, z wiedzą o każdym kwiecie i sekrecie uprawy.",
+          },
+          {
+            id: "04",
+            title: "Podejrzliwy Bibliotekarz",
+            description:
+              "Pilnujący ciszy, porządku na półkach i tajemnic skrytych w książkach.",
+          },
+          {
+            id: "05",
+            title: "Roztargniony Profesor",
+            description:
+              "Z głową pełną teorii, zapominający o codziennych sprawach.",
+          },
+          {
+            id: "06",
+            title: "Energiczny Instruktor Fitness",
+            description:
+              "Zawsze gotowy do działania, motywujący innych i pełen entuzjazmu.",
+          },
+          {
+            id: "07",
+            title: "Początkujący Magik",
+            description:
+              "Nie zawsze udane sztuczki, entuzjazm większy niż umiejętności.",
+          },
+          {
+            id: "08",
+            title: "Marzycielski Artysta",
+            description:
+              "Widzi piękno w codzienności, zawsze z głową w chmurach.",
+          },
+          {
+            id: "09",
+            title: "Przesądny Marynarz",
+            description:
+              "Pełen morskich opowieści, wierzący w znaki i przesądy.",
+          },
+          {
+            id: "10",
+            title: "Świeżo Upieczony Rodzic",
+            description:
+              "Niewyspany, nieco zagubiony, ale pełen miłości i troski.",
+          },
+          {
+            id: "11",
+            title: "Amatorski Detektyw",
+            description:
+              "Zafascynowany kryminalnymi zagadkami, widzi spiski wszędzie.",
+          },
+          {
+            id: "12",
+            title: "Entuzjastyczny Wynalazca",
+            description:
+              "Twórca dziwnych urządzeń, wierzący w swoją genialność.",
+          },
+          {
+            id: "13",
+            title: "Sprytny Złodziej",
+            description:
+              "Z umiejętnością wtapiania się w tłum i ostrym spojrzeniem.",
+          },
+          {
+            id: "14",
+            title: "Zagubiony w Czasie Podróżnik",
+            description:
+              "Zdezorientowany współczesnym światem, z anachronicznymi zwyczajami.",
+          },
+          // Nowe postacie (25)
+          {
+            id: "15",
+            title: "Ekscentryczny Milioner",
+            description:
+              "Z dziwacznymi zachciankami, ekstrawaganckim strojem i nieortodoksyjnymi pomysłami.",
+          },
+          {
+            id: "16",
+            title: "Paranoiczny Survivalista",
+            description:
+              "Przygotowany na każdą katastrofę, z plecakiem pełnym zapasów i teorii spiskowych.",
+          },
+          {
+            id: "17",
+            title: "Cyniczna Nastolatka",
+            description:
+              "Z telefonem w ręku, znudzona miną i komentarzem na każdą sytuację.",
+          },
+          {
+            id: "18",
+            title: "Zdezorientowany Astronauta",
+            description:
+              "Przyzwyczajony do nieważkości, z trudnościami w adaptacji do ziemskich warunków.",
+          },
+          {
+            id: "19",
+            title: "Nadgorliwy Stażysta",
+            description:
+              "Chcący zaimponować wszystkim, zapisujący każde słowo i próbujący przewidzieć potrzeby.",
+          },
+          {
+            id: "20",
+            title: "Dramatyczny Poeta",
+            description:
+              "Mówiący wierszem, z intensywnymi emocjami i egzaltowanymi gestami.",
+          },
+          {
+            id: "21",
+            title: "Zdeterminowana Sportsmenka",
+            description:
+              "Z duchem rywalizacji, niezdolna do odpuszczania i zawsze gotowa na wyzwanie.",
+          },
+          {
+            id: "22",
+            title: "Wiecznie Niezadowolony Krytyk",
+            description:
+              "Znajdujący wady we wszystkim, z wyrafinowanym gustem i wysokimi standardami.",
+          },
+          {
+            id: "23",
+            title: "Dyplomatyczny Mediator",
+            description:
+              "Szukający kompromisu, łagodzący konflikty i znajdujący wspólny grunt.",
+          },
+          {
+            id: "24",
+            title: "Rozgadany Taksówkarz",
+            description:
+              "Z historią na każdy temat, obszerną wiedzą lokalną i potrzebą dzielenia się.",
+          },
+          {
+            id: "25",
+            title: "Naiwny Optymista",
+            description:
+              "Widzący dobro we wszystkich, z niegasnącym uśmiechem i wiarą w szczęśliwe zakończenia.",
+          },
+          {
+            id: "26",
+            title: "Tajemniczy Iluzjonista",
+            description:
+              "Manipulujący percepcją, z mroczną przeszłością i sekretami ukrytymi w rękawach.",
+          },
+          {
+            id: "27",
+            title: "Roztrzęsiony Świadek",
+            description:
+              "Z drżącymi rękami, niespójną historią i traumatycznym doświadczeniem.",
+          },
+          {
+            id: "28",
+            title: "Niezdecydowany Planista Ślubny",
+            description:
+              "Z milionem opcji, chaotycznymi notatkami i presją nadchodzącego terminu.",
+          },
+          {
+            id: "29",
+            title: "Robotyczny Android",
+            description:
+              "Uczący się ludzkich zachowań, z precyzyjnymi ruchami i dosłowną interpretacją idiomów.",
+          },
+          {
+            id: "30",
+            title: "Zabobonny Jasnowidz",
+            description:
+              "Z amuletami, przepowiedniami i wyczuwaniem energii niewidocznych dla innych.",
+          },
+          {
+            id: "31",
+            title: "Niedoceniony Geniusz",
+            description:
+              "Z rewolucyjnymi teoriami, frustracją z powodu ignorancji innych i potrzebą uznania.",
+          },
+          {
+            id: "32",
+            title: "Nieśmiały Wynalazca",
+            description:
+              "Pracujący w cieniu, z innowacyjnymi pomysłami i trudnościami w komunikacji.",
+          },
+          {
+            id: "33",
+            title: "Przeżyta Gwiazda Rocka",
+            description:
+              "Z historiami z trasy, skórzaną kurtką i tęsknotą za dniami chwały.",
+          },
+          {
+            id: "34",
+            title: "Empatyczny Terapeuta",
+            description:
+              "Analizujący zachowania, zadający głębokie pytania i znajdujący ukryte motywy.",
+          },
+          {
+            id: "35",
+            title: "Podejrzliwy Konspirolog",
+            description:
+              "Widzący powiązania wszędzie, z notatkami pełnymi teorii i nieufnością wobec oficjalnych wersji.",
+          },
+          {
+            id: "36",
+            title: "Zdyscyplinowany Komandos",
+            description:
+              "Z wojskową precyzją, szybkimi reakcjami i strategicznym podejściem do każdej sytuacji.",
+          },
+          {
+            id: "37",
+            title: "Chaotyczny Artysta Cyrkowy",
+            description:
+              "Żonglujący przedmiotami, z kolorowym strojem i nieprzewidywalnymi akrobacjami.",
+          },
+          {
+            id: "38",
+            title: "Zapracowany Lekarz",
+            description:
+              "Bez snu, z poczuciem misji i skłonnością do stawiania diagnoz w każdej sytuacji.",
+          },
+          {
+            id: "39",
+            title: "Konserwatywny Urzędnik",
+            description:
+              "Przestrzegający procedur, z miłością do formularzy i obawą przed zmianami.",
+          },
+        ],
+        relationships: [
+          // Istniejące relacje (10)
+          {
+            id: "00",
+            title: "Dawni Kochankowie",
+            description:
+              "Burzliwa historia związku, nierozwiązane emocje i niewypowiedziane słowa.",
+          },
+          {
+            id: "01",
+            title: "Rodzeństwo w Konflikcie",
+            description:
+              "Lata rywalizacji, miłość przemieszana z frustracją i rodzinne sekrety.",
+          },
+          {
+            id: "02",
+            title: "Mentor i Uczeń",
+            description: "Relacja oparta na szacunku, wiedzy i wyzwaniach.",
+          },
+          {
+            id: "03",
+            title: "Rywale Zawodowi",
+            description:
+              "Konkurencja, wzajemny szacunek i granica między współpracą a sabotażem.",
+          },
+          {
+            id: "04",
+            title: "Tajemniczy Nieznajomi",
+            description:
+              "Intensywne połączenie, poczucie deja vu i wrażenie, że powinni się znać.",
+          },
+          {
+            id: "05",
+            title: "Wspólnicy w Zbrodni",
+            description:
+              "Tajemnica, która ich łączy, wzajemne zaufanie i strach przed odkryciem.",
+          },
+          {
+            id: "06",
+            title: "Szef i Pracownik",
+            description: "Hierarchia władzy, oczekiwania i ukryte ambicje.",
+          },
+          {
+            id: "07",
+            title: "Przyjaciele z Dzieciństwa",
+            description:
+              "Wspólna historia, dawne żarty i wspomnienia, które tylko oni rozumieją.",
+          },
+          {
+            id: "08",
+            title: "Małżeństwo w Kryzysie",
+            description:
+              "Miłość, która przeszła próbę czasu, niewypowiedziane żale i nadzieja.",
+          },
+          {
+            id: "09",
+            title: "Sąsiedzi w Konflikcie",
+            description: "Codzienne spory, pretensje i ukryta fascynacja.",
+          },
+          // Nowe relacje (30)
+          {
+            id: "10",
+            title: "Zwaśnione Rodziny",
+            description:
+              "Wielopokoleniowy konflikt, zakazana przyjaźń i presja lojalności wobec własnego klanu.",
+          },
+          {
+            id: "11",
+            title: "Nauczyciel i Problematyczny Uczeń",
+            description:
+              "Próby dotarcia do potencjału, testowanie granic i wzajemne uczenie się.",
+          },
+          {
+            id: "12",
+            title: "Przypadkowi Świadkowie Zbrodni",
+            description:
+              "Wspólna tajemnica, dylemat moralny i niepewność co do działań drugiej osoby.",
+          },
+          {
+            id: "13",
+            title: "Nowi Współlokatorzy",
+            description:
+              "Odkrywanie nawyków, negocjowanie przestrzeni i budowanie codziennych rytuałów.",
+          },
+          {
+            id: "14",
+            title: "Lekarz i Trudny Pacjent",
+            description:
+              "Walka o zaufanie, różnice w podejściu do leczenia i ukryte obawy.",
+          },
+          {
+            id: "15",
+            title: "Przymusowi Partnerzy w Projekcie",
+            description: "Różne style pracy, konflikt wizji i presja terminu.",
+          },
+          {
+            id: "16",
+            title: "Dawni Wrogowie",
+            description:
+              "Bolesna przeszłość, próba pojednania i cień dawnych uraz.",
+          },
+          {
+            id: "17",
+            title: "Detektyw i Podejrzany",
+            description:
+              "Gra w kotka i myszkę, ukryte informacje i niejednoznaczne dowody.",
+          },
+          {
+            id: "18",
+            title: "Rodzeństwo Odnalezione po Latach",
+            description:
+              "Luka w relacji, różne doświadczenia życiowe i próba nadrobienia straconego czasu.",
+          },
+          {
+            id: "19",
+            title: "Artysta i Mecenas",
+            description:
+              "Kreatywna wolność kontra oczekiwania, zależność finansowa i artystyczne kompromisy.",
+          },
+          {
+            id: "20",
+            title: "Zbuntowany Nastolatek i Rodzic",
+            description:
+              "Granice, niezależność, troska przebrana za kontrolę i trudna miłość.",
+          },
+          {
+            id: "21",
+            title: "Oszust i Jego Ofiara",
+            description:
+              "Manipulacja, narastająca świadomość podstępu i ewoluujące role.",
+          },
+          {
+            id: "22",
+            title: "Dwoje Ocalałych",
+            description:
+              "Wspólne traumatyczne przeżycie, więź zrodzona z kryzysu i różne sposoby radzenia sobie.",
+          },
+          {
+            id: "23",
+            title: "Dawni Rywale Sportowi",
+            description:
+              "Zaciętość na boisku, wspomnienia wielkich meczów i życie po zakończeniu kariery.",
+          },
+          {
+            id: "24",
+            title: "Strażnik i Więzień",
+            description:
+              "Władza i podporządkowanie, rutyna i próby zachowania człowieczeństwa.",
+          },
+          {
+            id: "25",
+            title: "Arystokrata i Służący",
+            description:
+              "Hierarchia społeczna, lojalność ponad podziałami i sekrety wysokich sfer.",
+          },
+          {
+            id: "26",
+            title: "Autor i Jego Krytyk",
+            description:
+              "Kreatywność spotyka analizę, osobista uraza i profesjonalny szacunek.",
+          },
+          {
+            id: "27",
+            title: "Nieznajomi na Wspólnej Misji",
+            description:
+              "Różne motywy, stopniowe budowanie zaufania i wspólny cel mimo różnic.",
+          },
+          {
+            id: "28",
+            title: "Rywal do Miłości Trzeciej Osoby",
+            description:
+              "Konkurencja, zazdrość i nieoczekiwana więź wynikająca z podobnego położenia.",
+          },
+          {
+            id: "29",
+            title: "Mistrz i Czeladnik",
+            description:
+              "Przekazywanie rzemiosła, tradycyjne wartości i napięcie między starymi a nowymi metodami.",
+          },
+          {
+            id: "30",
+            title: "Osoba z Amnezją i jej Opiekun",
+            description:
+              "Zagubienie, stopniowe odkrywanie przeszłości i niepewność relacji.",
+          },
+          {
+            id: "31",
+            title: "Przeciwnicy Polityczni",
+            description:
+              "Ideologiczne różnice, szacunek dla przeciwnika i poszukiwanie wspólnej płaszczyzny.",
+          },
+          {
+            id: "32",
+            title: "Dwaj Oszuści",
+            description:
+              "Wzajemna nieufność, partnerstwo z konieczności i ciągłe sprawdzanie się nawzajem.",
+          },
+          {
+            id: "33",
+            title: "Pracoholik i Osoba Walcząca o Jego Uwagę",
+            description:
+              "Priorytety, zaniedbanie i próby znalezienia równowagi.",
+          },
+          {
+            id: "34",
+            title: "Terapeuta i Klient",
+            description:
+              "Profesjonalne granice, głębokie zrozumienie i opór przed zmianą.",
+          },
+          {
+            id: "35",
+            title: "Bohater i Uratowana Osoba",
+            description:
+              "Wdzięczność, poczucie długu i niekomfortowa nierównowaga.",
+          },
+          {
+            id: "36",
+            title: "Były Małżonek i Nowy Partner",
+            description:
+              "Zazdrość, porównania i próba znalezienia nowej równowagi.",
+          },
+          {
+            id: "37",
+            title: "Odległy Krewny i Spadkobierca",
+            description:
+              "Nagłe powiązanie, podejrzliwość o motywy i odkrywanie rodzinnych podobieństw.",
+          },
+          {
+            id: "38",
+            title: "Dwie Osoby Przeżywające Żałobę",
+            description:
+              "Wspólna strata, różne etapy godzenia się z nią i wspieranie się nawzajem.",
+          },
+          {
+            id: "39",
+            title: "Przełożony i Podwładny po Godzinach",
+            description:
+              "Zmiana dynamiki poza pracą, odkrywanie prawdziwych osobowości i zmiana perspektywy.",
+          },
+        ],
+        challenges: [
+          // Istniejące wyzwania (15)
+          {
+            id: "00",
+            title: "Pytania Bez Odpowiedzi",
+            description:
+              "Wszyscy aktorzy mogą mówić tylko pytaniami przez następną minutę.",
+          },
+          {
+            id: "01",
+            title: "Niewidzialny Przedmiot",
+            description:
+              "Wprowadź do sceny wymyślony przedmiot i przekazuj go między postaciami.",
+          },
+          {
+            id: "02",
+            title: "Zmiana Motywacji",
+            description:
+              "Jedna z postaci nagle zmienia swoją główną motywację. Publiczność wybiera która.",
+          },
+          {
+            id: "03",
+            title: "Cisza Znacząca",
+            description: "Przez 30 sekund komunikujcie się bez użycia słów.",
+          },
+          {
+            id: "04",
+            title: "Scena w Zwolnionym Tempie",
+            description:
+              'Na hasło "slow motion" rozpocznij grę w zwolnionym tempie aż do odwołania.',
+          },
+          {
+            id: "05",
+            title: "Narrator Wkracza",
+            description:
+              "Jeden z aktorów staje się narratorem, opisującym działania innych.",
+          },
+          {
+            id: "06",
+            title: "Obcy Język",
+            description:
+              "Jedna postać zaczyna mówić wymyślonym językiem, pozostali muszą ją zrozumieć.",
+          },
+          {
+            id: "07",
+            title: "Zamrożenie",
+            description:
+              'Na hasło "freeze" wszyscy zastygają w miejscu, tylko jedna osoba może się poruszać (wybrana przez publiczność).',
+          },
+          {
+            id: "08",
+            title: "Wewnętrzny Monolog",
+            description:
+              "Każdy aktor musi raz wyrazić na głos swoje myśli, których inne postaci 'nie słyszą'.",
+          },
+          {
+            id: "09",
+            title: "Przyspieszenie",
+            description:
+              "Tempo dialogów i działań zwiększa się stopniowo, aż osiągnie komiczny poziom.",
+          },
+          {
+            id: "10",
+            title: "Przeszłość/Przyszłość",
+            description:
+              "Scena przenosi się nagle 20 lat w przeszłość lub przyszłość na 1 minutę.",
+          },
+          {
+            id: "11",
+            title: "Dziwne Nawyki",
+            description:
+              "Każda postać musi wprowadzić dziwaczny nawyk, który powtarza się w trakcie sceny.",
+          },
+          {
+            id: "12",
+            title: "Emocjonalny Rollercoaster",
+            description:
+              "Postać musi przejść przez 3 skrajne emocje w ciągu 1 minuty.",
+          },
+          {
+            id: "13",
+            title: "Dubbing",
+            description:
+              "Jeden aktor porusza ustami, drugi stojący za nim mówi za niego.",
+          },
+          {
+            id: "14",
+            title: "Telepatyczne Połączenie",
+            description:
+              "Dwie wskazane przez publiczność postacie mogą słyszeć nawzajem swoje myśli.",
+          },
+          // Nowe wyzwania (25)
+          {
+            id: "15",
+            title: "Jedna Osoba Mówi za Wszystkich",
+            description:
+              "Wybrany aktor jest jedynym, który może mówić za wszystkie postacie przez minutę.",
+          },
+          {
+            id: "16",
+            title: "Ekspert w Dziedzinie",
+            description:
+              "Każda postać nagle staje się ekspertem w dziedzinie wskazanej przez publiczność.",
+          },
+          {
+            id: "17",
+            title: "Śpiewane Dialogi",
+            description:
+              "Wszystkie wypowiedzi przez następną minutę muszą być zaśpiewane.",
+          },
+          {
+            id: "18",
+            title: "Efekty Dźwiękowe",
+            description:
+              "Jeden z aktorów tworzy efekty dźwiękowe do wszystkich czynności wykonywanych na scenie.",
+          },
+          {
+            id: "19",
+            title: "Tajny Agent",
+            description:
+              "Jedna postać otrzymuje tajną misję od publiczności, którą musi zrealizować bez wzbudzania podejrzeń.",
+          },
+          {
+            id: "20",
+            title: "Zmiana Gatunku",
+            description:
+              "Scena zmienia gatunek filmowy (np. z komedii w horror) na hasło publiczności.",
+          },
+          {
+            id: "21",
+            title: "Słowo Tabu",
+            description:
+              "Publiczność wybiera słowo, którego nie można używać. Kto je wypowie, musi wykonać zabawną karę.",
+          },
+          {
+            id: "22",
+            title: "Scena Lustrzana",
+            description:
+              "Dwie postaci muszą naśladować swoje ruchy jak w lustrze przez 30 sekund.",
+          },
+          {
+            id: "23",
+            title: "Zbiorowa Świadomość",
+            description:
+              "Wszyscy aktorzy muszą dokończyć zdania rozpoczęte przez innych, jakby dzielili jeden umysł.",
+          },
+          {
+            id: "24",
+            title: "Scenariusz Alternatywny",
+            description:
+              "Ostatnia minuta sceny zostaje 'cofnięta' i zagrana inaczej po sugestii z publiczności.",
+          },
+          {
+            id: "25",
+            title: "Przewodnik po Obcym Świecie",
+            description:
+              "Jedna postać staje się przewodnikiem turystycznym, opisującym dziwaczne zasady miejsca, w którym się znajdują.",
+          },
+          {
+            id: "26",
+            title: "Zmiana Statusu",
+            description:
+              "Postać o najwyższym statusie społecznym nagle staje się tą o najniższym i odwrotnie.",
+          },
+          {
+            id: "27",
+            title: "Pantomima Przedmiotu",
+            description:
+              "Wprowadź do sceny przedmiot pantomimiczny, który zmienia swoje właściwości przy każdym przekazaniu.",
+          },
+          {
+            id: "28",
+            title: "Taniec Sytuacyjny",
+            description:
+              "W kluczowym momencie postacie wyrażają emocje poprzez improwizowany taniec trwający 20 sekund.",
+          },
+          {
+            id: "29",
+            title: "Mowa Końcowa",
+            description:
+              "Każda postać wygłasza 15-sekundową dramatyczną mowę, jakby był to finał filmu.",
+          },
+          {
+            id: "30",
+            title: "Słowa Inicjujące",
+            description:
+              "Przez minutę każde zdanie musi zaczynać się od kolejnej litery alfabetu.",
+          },
+          {
+            id: "31",
+            title: "Napisy Końcowe",
+            description:
+              "Aktorzy zatrzymują akcję i każdy opowiada, co stało się z jego postacią 10 lat później.",
+          },
+          {
+            id: "32",
+            title: "Wywiad z Bohaterem",
+            description:
+              "Scena zatrzymuje się, a jeden aktor prowadzi wywiad z innym, który pozostaje w postaci.",
+          },
+          {
+            id: "33",
+            title: "Obiekty Ożywają",
+            description:
+              "Przedmioty w otoczeniu zyskują osobowość i głos (odgrywane przez dodatkowego aktora).",
+          },
+          {
+            id: "34",
+            title: "Tajemnicza Przesyłka",
+            description:
+              "Do sceny zostaje wprowadzona przesyłka z tajemniczą zawartością, która wpływa na wszystkie postacie.",
+          },
+          {
+            id: "35",
+            title: "Połączenie Telefoniczne",
+            description:
+              "Jedna postać odbiera ważny telefon od kogoś, kogo odgrywa publiczność.",
+          },
+          {
+            id: "36",
+            title: "Superbohaterowie Incognito",
+            description:
+              "Każda postać jest sekretnym superbohaterem, który stopniowo zdradza swoje moce.",
+          },
+          {
+            id: "37",
+            title: "Radio Przerywa",
+            description:
+              "Co 30 sekund z niewidzialnego radia dobiega ważna informacja, która zmienia przebieg sceny.",
+          },
+          {
+            id: "38",
+            title: "Wspólny Sen",
+            description:
+              "Scena zamienia się we wspólny sen postaci, gdzie logika i prawa fizyki nie obowiązują.",
+          },
+          {
+            id: "39",
+            title: "Głos Publiczności",
+            description:
+              "Publiczność wybiera słowa kluczowe, które muszą pojawić się w każdym zdaniu przez następną minutę.",
+          },
+        ],
+        inspirations: [
+          // Istniejące inspiracje (10)
+          {
+            id: "00",
+            title: "Zazdrość",
+            description:
+              "Zielone oko zazdrości wpływa na relacje, decyzje i przyszłość.",
+          },
+          {
+            id: "01",
+            title: "Klucz",
+            description:
+              "Przedmiot otwierający drzwi do tajemnic, możliwości lub wspomnień.",
+          },
+          {
+            id: "02",
+            title: "Tajemnica",
+            description:
+              "Sekret, który może połączyć lub podzielić, uwolnić lub uwięzić.",
+          },
+          {
+            id: "03",
+            title: "Nieporozumienie",
+            description:
+              "Błędna interpretacja, która prowadzi do nieoczekiwanych konsekwencji.",
+          },
+          {
+            id: "04",
+            title: "Odkrycie",
+            description:
+              "Znalezisko zmieniające perspektywę, ujawniające prawdę lub kwestionujące przekonania.",
+          },
+          {
+            id: "05",
+            title: "Przebaczenie",
+            description:
+              "Uwalniająca moc wybaczenia, trudne decyzje i nowe początki.",
+          },
+          {
+            id: "06",
+            title: "Utrata",
+            description:
+              "Pustka po czymś ważnym, proces żałoby i adaptacja do nowej rzeczywistości.",
+          },
+          {
+            id: "07",
+            title: "Podróż",
+            description:
+              "Fizyczna lub metaforyczna wędrówka, zmiana i doświadczenie.",
+          },
+          {
+            id: "08",
+            title: "Poświęcenie",
+            description: "Wybór między własnymi pragnieniami a dobrem innych.",
+          },
+          {
+            id: "09",
+            title: "Transformacja",
+            description:
+              "Przemiana wewnętrzna lub zewnętrzna, metamorfoza i odrodzenie.",
+          },
+          // Nowe inspiracje (30)
+          {
+            id: "10",
+            title: "Zdrada",
+            description:
+              "Złamane zaufanie, niespodziewany cios od bliskiej osoby i konsekwencje.",
+          },
+          {
+            id: "11",
+            title: "Ostatnia Szansa",
+            description:
+              "Desperacka próba, wszystko na jedną kartę i ciężar ostateczności.",
+          },
+          {
+            id: "12",
+            title: "Przeznaczenie",
+            description:
+              "Nieuniknione spotkanie, przepowiednia i pytanie o wolną wolę.",
+          },
+          {
+            id: "13",
+            title: "Iluzja",
+            description:
+              "Rzeczywistość nie jest tym, czym się wydaje, maski i prawda ukryta za zasłoną.",
+          },
+          {
+            id: "14",
+            title: "Echo Przeszłości",
+            description:
+              "Powracające wspomnienia, niezamknięte sprawy i szansa na odkupienie.",
+          },
+          {
+            id: "15",
+            title: "Deadline",
+            description:
+              "Wyścig z czasem, presja i priorytety ujawniające się w kryzysie.",
+          },
+          {
+            id: "16",
+            title: "Ukryta Tożsamość",
+            description:
+              "Sekretne życie, podwójne istnienie i strach przed zdemaskowaniem.",
+          },
+          {
+            id: "17",
+            title: "Przekleństwo",
+            description: "Ciążący los, poszukiwanie wyjścia i cena uwolnienia.",
+          },
+          {
+            id: "18",
+            title: "Konflikt Lojalności",
+            description:
+              "Rozdarte serce między dwoma obowiązkami, niemożliwy wybór.",
+          },
+          {
+            id: "19",
+            title: "Zamknięte Drzwi",
+            description:
+              "Izolacja, ograniczone możliwości i poszukiwanie wyjścia.",
+          },
+          {
+            id: "20",
+            title: "Pokusa",
+            description:
+              "Wewnętrzna walka, moralny dylemat i cena ulegania pragnieniom.",
+          },
+          {
+            id: "21",
+            title: "Ultimatum",
+            description:
+              "Decyzja pod presją, ograniczony czas i niemożliwy wybór.",
+          },
+          {
+            id: "22",
+            title: "Obietnica",
+            description:
+              "Dane słowo, honor na szali i próba dotrzymania zobowiązania mimo przeszkód.",
+          },
+          {
+            id: "23",
+            title: "Pamięć",
+            description:
+              "Subiektywne wspomnienia, zapominanie i to, co wybieramy pamiętać.",
+          },
+          {
+            id: "24",
+            title: "Drugie Dno",
+            description:
+              "Pozory mylą, ukryte motywy i prawda głębiej niż się wydaje.",
+          },
+          {
+            id: "25",
+            title: "Wyzwolenie",
+            description: "Zerwane kajdany, nowy początek i ciężar wolności.",
+          },
+          {
+            id: "26",
+            title: "Obsesja",
+            description:
+              "Pochłaniające pragnienie, zaślepienie i granica między pasją a szaleństwem.",
+          },
+          {
+            id: "27",
+            title: "Ryzyko",
+            description: "Wszystko albo nic, adrenalina i kalkulacja szans.",
+          },
+          {
+            id: "28",
+            title: "Przyjaźń",
+            description:
+              "Więź silniejsza niż krew, lojalność wystawiona na próbę i bezwarunkowe wsparcie.",
+          },
+          {
+            id: "29",
+            title: "Szantaż",
+            description:
+              "Manipulacja, ukryta informacja i desperackie próby uwolnienia się.",
+          },
+          {
+            id: "30",
+            title: "Dawny Dług",
+            description:
+              "Zobowiązanie z przeszłości, nadszedł czas spłaty i konsekwencje zwłoki.",
+          },
+          {
+            id: "31",
+            title: "Wybór Mniejszego Zła",
+            description:
+              "Nie ma dobrych opcji, tylko trudne decyzje i ich następstwa.",
+          },
+          {
+            id: "32",
+            title: "Głos Sumienia",
+            description:
+              "Wewnętrzny konflikt, moralny kompas i ciężar przeszłych decyzji.",
+          },
+          {
+            id: "33",
+            title: "Zakazana Wiedza",
+            description:
+              "Informacja, która zmienia wszystko, niebezpieczna prawda i odpowiedzialność.",
+          },
+          {
+            id: "34",
+            title: "Spotkanie z Przeznaczeniem",
+            description:
+              "Nieunikniona konfrontacja, moment, do którego wszystko prowadziło.",
+          },
+          {
+            id: "35",
+            title: "Nawiedzenie",
+            description:
+              "Przeszłość, która nie daje spokoju, duchy (dosłowne lub metaforyczne) i konfrontacja.",
+          },
+          {
+            id: "36",
+            title: "Zamiana Ról",
+            description:
+              "Nowa perspektywa, życie w cudzych butach i zrozumienie drugiej strony.",
+          },
+          {
+            id: "37",
+            title: "Czas się Kończy",
+            description:
+              "Ostatnie chwile, priorytetyzacja i to, co naprawdę ważne.",
+          },
+          {
+            id: "38",
+            title: "Manipulacja",
+            description:
+              "Pajęcza sieć wpływów, ukryte sznurki i uświadomienie sobie bycia marionetką.",
+          },
+          {
+            id: "39",
+            title: "Niespodziewany Sojusz",
+            description:
+              "Współpraca wrogów, wspólny cel i kruche zaufanie mimo różnic.",
+          },
+        ],
+      }
+
+      // Stan aplikacji
+      let currentState = {
+        location: null,
+        character: null,
+        relationship: null,
+        challenge: null,
+        inspiration: null,
+        combinationCode: null,
+      }
+
+      // Funkcja losująca kartę - ZMODYFIKOWANA aby wyświetlała ID przy nagłówku
+      function drawCard(type) {
+        const cardArray = cards[type]
+        const randomIndex = Math.floor(Math.random() * cardArray.length)
+        const card = cardArray[randomIndex]
+
+        // Aktualizacja stanu
+        switch (type) {
+          case "locations":
+            currentState.location = card
+            break
+          case "characters":
+            currentState.character = card
+            break
+          case "relationships":
+            currentState.relationship = card
+            break
+          case "challenges":
+            currentState.challenge = card
+            break
+          case "inspirations":
+            currentState.inspiration = card
+            break
+        }
+
+        let elementId, cardIdElementId
+        switch (type) {
+          case "locations":
+            elementId = "location-card"
+            cardIdElementId = "location-id"
+            break
+          case "characters":
+            elementId = "character-card"
+            cardIdElementId = "character-id"
+            break
+          case "relationships":
+            elementId = "relationship-card"
+            cardIdElementId = "relationship-id"
+            break
+          case "challenges":
+            elementId = "challenge-card"
+            cardIdElementId = "challenge-id"
+            break
+          case "inspirations":
+            elementId = "inspiration-card"
+            cardIdElementId = "inspiration-id"
+            break
+        }
+
+        // Aktualizacja treści karty BEZ kodu
+        document.getElementById(elementId).innerHTML = `
+                <h4>${card.title}</h4>
+                <p>${card.description}</p>
+            `
+
+        // Aktualizacja ID karty przy nagłówku
+        document.getElementById(cardIdElementId).textContent = card.id
+
+        checkAllCardsDrawn()
+      }
+
+      // Sprawdza, czy wszystkie karty zostały wylosowane i generuje kod kombinacji
+      function checkAllCardsDrawn() {
+        if (
+          currentState.location &&
+          currentState.character &&
+          currentState.relationship &&
+          currentState.challenge &&
+          currentState.inspiration
+        ) {
+          currentState.combinationCode =
+            currentState.location.id +
+            currentState.character.id +
+            currentState.relationship.id +
+            currentState.challenge.id +
+            currentState.inspiration.id
+          document.getElementById("combinationNumber").textContent =
+            currentState.combinationCode
+        }
+      }
+
+      // Losuje wszystkie karty
+      function drawAllCards() {
+        drawCard("locations")
+        drawCard("characters")
+        drawCard("relationships")
+        drawCard("challenges")
+        drawCard("inspirations")
+      }
+
+      // Zapisuje wyniki do pliku tekstowego
+      function saveToFile() {
+        if (
+          !currentState.location ||
+          !currentState.character ||
+          !currentState.relationship ||
+          !currentState.challenge ||
+          !currentState.inspiration
+        ) {
+          alert("Proszę najpierw wylosować wszystkie karty!")
+          return
+        }
+
+        const date = new Date()
+        const formattedDate = `${date.getDate()}.${
+          date.getMonth() + 1
+        }.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`
+
+        let content = `=== IMPRO CARDS - WYNIKI LOSOWANIA ===\n`
+        content += `Data: ${formattedDate}\n`
+        content += `Aplikacja: Impro Cards Generator v1.2\n`
+        content += `Numer kombinacji: ${currentState.combinationCode}\n\n`
+
+        content += `--- MIEJSCE ---\n`
+        content += `Kod: ${currentState.location.id}\n`
+        content += `Tytuł: ${currentState.location.title}\n`
+        content += `Opis: ${currentState.location.description}\n\n`
+
+        content += `--- POSTAĆ ---\n`
+        content += `Kod: ${currentState.character.id}\n`
+        content += `Tytuł: ${currentState.character.title}\n`
+        content += `Opis: ${currentState.character.description}\n\n`
+
+        content += `--- RELACJA ---\n`
+        content += `Kod: ${currentState.relationship.id}\n`
+        content += `Tytuł: ${currentState.relationship.title}\n`
+        content += `Opis: ${currentState.relationship.description}\n\n`
+
+        content += `--- WYZWANIE ---\n`
+        content += `Kod: ${currentState.challenge.id}\n`
+        content += `Tytuł: ${currentState.challenge.title}\n`
+        content += `Opis: ${currentState.challenge.description}\n\n`
+
+        content += `--- INSPIRACJA ---\n`
+        content += `Kod: ${currentState.inspiration.id}\n`
+        content += `Tytuł: ${currentState.inspiration.title}\n`
+        content += `Opis: ${currentState.inspiration.description}\n\n`
+
+        content += `=================================\n`
+        content += `Powodzenia w improwizacji!`
+
+        const blob = new Blob([content], { type: "text/plain" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `impro_cards_${currentState.combinationCode}.txt`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }
+
+      // Funkcja resetująca (czyści) karty i stan aplikacji - ZMODYFIKOWANA
+      function resetCards() {
+        currentState = {
+          location: null,
+          character: null,
+          relationship: null,
+          challenge: null,
+          inspiration: null,
+          combinationCode: null,
+        }
+
+        document.getElementById("location-card").innerHTML =
+          '<p>Naciśnij "Losuj" aby wylosować kartę miejsca...</p>'
+        document.getElementById("character-card").innerHTML =
+          '<p>Naciśnij "Losuj" aby wylosować kartę postaci...</p>'
+        document.getElementById("relationship-card").innerHTML =
+          '<p>Naciśnij "Losuj" aby wylosować kartę relacji...</p>'
+        document.getElementById("challenge-card").innerHTML =
+          '<p>Naciśnij "Losuj" aby wylosować kartę wyzwania...</p>'
+        document.getElementById("inspiration-card").innerHTML =
+          '<p>Naciśnij "Losuj" aby wylosować kartę inspiracji...</p>'
+
+        // Resetowanie ID kart
+        document.getElementById("location-id").textContent = "-"
+        document.getElementById("character-id").textContent = "-"
+        document.getElementById("relationship-id").textContent = "-"
+        document.getElementById("challenge-id").textContent = "-"
+        document.getElementById("inspiration-id").textContent = "-"
+
+        document.getElementById("combinationNumber").textContent = "-"
+      }
+
+      // Timer
+      let countdown
+      let timeInSeconds = 0
+      const timerDisplay = document.getElementById("timer")
+      const startButton = document.getElementById("startTimer")
+      const stopButton = document.getElementById("stopTimer")
+      const resetTimerButton = document.getElementById("resetTimer")
+
+      function updateTimerDisplay() {
+        const minutes = Math.floor(timeInSeconds / 60)
+        const seconds = timeInSeconds % 60
+        timerDisplay.textContent = `${minutes < 10 ? "0" + minutes : minutes}:${
+          seconds < 10 ? "0" + seconds : seconds
+        }`
+      }
+
+      function startTimer() {
+        clearInterval(countdown)
+        countdown = setInterval(() => {
+          if (timeInSeconds > 0) {
+            timeInSeconds--
+            updateTimerDisplay()
+          } else {
+            clearInterval(countdown)
+            timerDisplay.textContent = "KONIEC!"
+            setTimeout(() => {
+              timerDisplay.textContent = "00:00"
+            }, 3000)
+          }
+        }, 1000)
+      }
+
+      function stopTimer() {
+        clearInterval(countdown)
+      }
+
+      function resetTimer() {
+        clearInterval(countdown)
+        timeInSeconds = 0
+        updateTimerDisplay()
+      }
+
+      function setTimer(minutes) {
+        timeInSeconds = minutes * 60
+        updateTimerDisplay()
+      }
+
+      // Nasłuchiwanie zdarzeń
+      startButton.addEventListener("click", startTimer)
+      stopButton.addEventListener("click", stopTimer)
+      resetTimerButton.addEventListener("click", resetTimer)
+      document
+        .getElementById("saveButton")
+        .addEventListener("click", saveToFile)
+      document
+        .getElementById("resetCards")
+        .addEventListener("click", resetCards)
+
+      // Przełączanie widoczności zasad - ORYGINALNY KOD, BEZ MODYFIKACJI
+      document
+        .getElementById("toggleRules")
+        .addEventListener("click", function () {
+          const rulesSection = document.getElementById("rulesSection")
+          const currentDisplay = window.getComputedStyle(rulesSection).display
+          if (currentDisplay === "none") {
+            rulesSection.style.display = "block"
+            this.textContent = "Ukryj zasady gry"
+          } else {
+            rulesSection.style.display = "none"
+            this.textContent = "Pokaż zasady gry"
+          }
+        })
+
+      window.addEventListener("load", function () {
+        document.getElementById("rulesSection").style.display = "none"
+        updateTimerDisplay()
+      })
+    </script>
+  </body>
+</html>
